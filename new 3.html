@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="pl">
+	<head>
+	  <meta charset="UTF-8">
+	  <title>B/S/H</title>
+		  <style>
+				body {
+				  margin: 0;
+				  padding: 0;
+				  background-color: #ff6840;
+				  font-family: 'Noto Sans';
+				  height: 100vh;
+				  display: flex;
+				  flex-direction: column;
+				  font-style: normal;
+
+
+				#header {
+				  font-family:'Noto Sans', sans-serif;
+				  text-align: right;
+				  padding: 20px;
+				  font-weight: bold;
+				  font-size: 44px;
+				  color: black;
+				  font-style: normal;
+				}
+
+				#languageSwitcher {
+				  position: absolute;
+				  top: 20px;
+				  left: 20px;
+				  z-index: 1000;
+				}
+
+				#languageSwitcher img {
+				  width: 30px;
+				  height: auto;
+				  margin-right: 10px;
+				  cursor: pointer;
+				}
+
+				#menu {
+				  flex-grow: 1;
+				  display: flex;
+				  justify-content: center;
+				  align-items: center;
+				  gap: 40px;
+				  height: 100%;
+				  background-color: #ffffff;
+				}
+
+				.box {
+				  width: 300px;
+				  height: 300px;
+				  background-size: cover;
+				  background-position: center;
+				  color: white;
+				  display: flex;
+				  align-items: center;
+				  justify-content: center;
+				  cursor: pointer;
+				  font-weight: bold;
+				  font-size: 16px;
+				  border-radius: 10px;
+				  box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+				  text-shadow: 1px 1px 4px black;
+				}
+
+				.box:hover {
+				  transform: scale(1.05);
+				  transition: 0.2s;
+				}
+
+				.quiz-box {
+				  background-image: url('https://i.ibb.co/fYwqjcg8/Quiz-grafika-HPC.png');
+				}
+
+				.fortune-box {
+				  background-image: url('https://i.ibb.co/v6bLvyJL/Daily-HPC-reminder-grafika-HPC.png');
+				}
+
+				.rebus-box {
+				  background-image: url('https://i.ibb.co/JWfzx8yK/Rebus-grafika-HPC.png');
+				}
+
+				#content {
+				  padding: 30px;
+				  display: none;
+				}
+
+				.section {
+				  display: none;
+				}
+
+				#backBtn {
+				  display: none;
+				  position: absolute;
+				  top: 30px;
+				  left: 20px;
+				  padding: 8px 15px;
+				  background: white;
+				  border: none;
+				  border-radius: 5px;
+				  cursor: pointer;
+				  color: black;
+				  font-weight: bold;
+				}
+
+				#quizResult {
+			      font-size: 28px; 
+			      text-align: center;
+			      margin-top: 40px;
+				}
+
+				#quizResult img {
+				  max-width: 400px; 
+				  height: auto;
+				  margin-top: 20px;
+				  border-radius: 20px;
+				  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+				}
+
+				label {
+				  display: block;
+				  margin: 5px 0;
+				}
+
+				button {
+				  margin-top: 20px;
+				  padding: 8px 16px;
+				  border: none;
+				  background: #333;
+				  color: white;
+				  border-radius: 4px;
+				  cursor: pointer;
+				}
+
+				button:hover {
+				  background: #000;
+				}
+				h2 {
+				  font-size: 25px; 
+			      text-align: center;
+			      margin-top: 40px;
+				}
+				#quizQuestion {
+				  font-size: 13px; 
+			      text-align: center;
+			      margin-top: 40px;
+				}
+		  </style>
+	</head>
+		<body>
+		  <div id="languageSwitcher">
+			<img src="https://flagcdn.com/w40/pl.png" onclick="setLanguage('pl')" title="Polski">
+			<img src="https://flagcdn.com/w40/gb.png" onclick="setLanguage('en')" title="English">
+			<img src="https://flagcdn.com/w40/de.png" onclick="setLanguage('de')" title="Deutsch">
+		  </div>
+
+		  <div id="header">B/S/H</div>
+
+		  <div id="menu">
+			<div class="box quiz-box" onclick="showSection('quiz')">Quiz osobowości</div>
+			<div class="box fortune-box" onclick="showSection('fortune')">Ciastko z wróżbą</div>
+			<div class="box rebus-box" onclick="showSection('rebus')">Rebus</div>
+		  </div>
+
+		  <button id="backBtn" onclick="goHome()"> ← Powrót</button>
+
+		  <div id="content">
+				<div id="quiz" class="section">
+				  <h2>Quiz osobowości</h2>
+				  <div id="quizQuestion"></div>
+				  <div id="quizResult" style="display:none;"></div>
+				</div>
+
+				<div id="fortune" class="section">
+				  <h2>Twoja wróżba:</h2>
+				  <div id="fortuneText"></div>
+				</div>
+
+				<div id="rebus" class="section">
+				  <h2>Rebus</h2>
+				  <p id="rebusText">Tu pojawi się rebus…</p>
+				</div>
+		  </div>
+
+			  <script>
+					const translations = {
+					  pl: {
+						quizTitle: "Quiz osobowości",
+						fortuneTitle: "Twoja wróżba:",
+						rebusTitle: "Rebus",
+						rebusText: "Tu pojawi się rebus…",
+						back: "← Powrót",
+						quizButton: "Quiz osobowości",
+						fortuneButton: "Ciastko z wróżbą",
+						rebusButton: "Rebus",
+						quizQuestions: [
+						  {
+							question: "Co najbardziej cenisz w swojej pracy?",
+							answers: { A: "Zadowolenie klientów i partnerów ", B: "Zaufanie i dobra atmosfera ", C: "Możliwość wzięcia odpowiedzialności ", D: "Osiąganie celów i wyników ", E: "Upraszczanie i innowacje ", F: "Analizowanie danych i faktów ", G: "Nauka i rozwój ", H: "Wyrażanie swojej opinii ", I: "Praca w różnorodnym zespole  ", J: "Szybkie działanie i rezultaty  " }
+						  },
+						  {
+							question: "Jak zachowujesz się, gdy pojawia się trudna sytuacja?",
+							answers: { A: "Myślę o kliencie – co będzie dla niego najlepsze.", B: "Słucham zespołu i wspólnie szukamy rozwiązania.", C: "Przejmuję inicjatywę i biorę sprawy w swoje ręce.", D: "Patrzę na cel – i działam konsekwentnie.", E: "Szukam sposobu, żeby uprościć problem.", F: "Analizuję dostępne dane i opcje.", G: "Traktuję to jako okazję do nauki.", H: "Otwarcie mówię, co uważam, i szukam decyzji." , I: "Staram się połączyć różne perspektywy. ", J: "Reaguję szybko i podejmuję natychmiastowe działanie. " }
+						  },
+						  {
+							question: "Co sprawia Ci największą satysfakcję zawodową?",
+							answers: { A: "Zadowolony klient lub użytkownik.", B: "Dobra współpraca i zaufanie w zespole.", C: "Uczucie, że zrobiłem/am coś ważnego i samodzielnie.", D: "Zrealizowanie ambitnego celu.", E: "Zrobienie czegoś prościej niż wcześniej.", F: "Gdy coś działa dzięki logicznemu podejściu.", G: "Kiedy uczę się czegoś nowego.", H: "Gdy mogę coś zmienić przez swoje pomysły.", I: "Widzę efekty współpracy różnych ludzi. ", J: "Gdy szybko zamykam zadanie z sukcesem. " }
+						  },
+						  {
+							question: "Jak zazwyczaj podejmujesz decyzje?",
+							answers: { A: "Pytam: co na to klient?", B: "Konsultuję z zespołem.", C: "Sam/a oceniam i podejmuję decyzję.", D: "Patrzę na cel i wybieram najlepszą drogę.", E: "Zmieniam podejście, jeśli widzę lepsze rozwiązanie.", F: "Korzystam z danych i analiz.", G: "Biorę pod uwagę, czego się mogę nauczyć.", H: "Dzielę się swoim zdaniem i działam zgodnie z nim.", I: "Staram się uwzględnić różne opinie.", J: "Decyduję szybko – lepiej zrobić niż czekać." }
+						  },
+						  {
+							question: "Co robisz, gdy zespół nie może dojść do porozumienia??",
+							answers: { A: "Przypominam, że klient jest najważniejszy.", B: "Staram się, żeby wszyscy czuli się wysłuchani.", C: "Przejmuję odpowiedzialność i ruszam do działania.", D: "Wskazuję na wspólny cel i skupiam się na wyniku.", E: "Proponuję inne, prostsze rozwiązanie.", F: "Przywołuję dane, które mogą pomóc rozstrzygnąć.", G: "Wykorzystuję sytuację jako lekcję zespołową.", H: "Wyrażam swoje zdanie, nawet jeśli inne.", I: "Zachęcam do połączenia różnych pomysłów.", J: "Popycham sprawy do przodu, żeby nie stały w miejscu." }
+						  },
+						  {
+							question: "Jakie wyzwania lubisz najbardziej?",
+							answers: { A: "Związane z obsługą klienta.", B: "Relacyjne, wymagające empatii.", C: "Gdy trzeba coś samodzielnie 'ogarnąć'.", D: "Wysokie cele i napięte terminy.", E: "Gdy można coś zautomatyzować lub uprościć.", F: "Gdy trzeba przeanalizować dane lub procesy.", G: "Gdy mogę się czegoś nowego nauczyć.", H: "Wymagające odwagi do wypowiedzenia się.", I: "Wymagające spojrzenia z różnych stron.", J: "Gdy trzeba działać pod presją czasu." }
+						  },
+						  {
+							question: "Jak reagujesz na zmiany w firmie?",
+							answers: { A: "Patrzę, jak wpłyną na klientów.", B: "Rozmawiam z innymi, żeby lepiej zrozumieć.", C: "Przejmuję inicjatywę i się dostosowuję.", D: "Myślę, jak najlepiej osiągnąć nowe cele.", E: "Wprowadzam uproszczenia, jeśli trzeba.", F: "Analizuję za i przeciw.", G: "Szukam możliwości rozwoju.", H: "Dzielę się swoim punktem widzenia.", I: "Staram się pogodzić różne reakcje.", J: "Od razu działam – nie lubię zwlekać." }
+						  },
+						  {
+							question: "Które zdanie najlepiej do Ciebie pasuje?",
+							answers: { A: "Klient zawsze na pierwszym miejscu.", B: "Zespół to moja siła.", C: "Jeśli nie ja, to kto?", D: "Nie odpuszczam celu.", E: "Wszystko da się zrobić prościej.", F: "Liczby nie kłamią.", G: "Każda sytuacja to szansa na rozwój.", H: "Mów, co myślisz – z szacunkiem.", I: "W różnorodności tkwi siła.", J: "Liczy się działanie, nie gadanie." }
+						  },
+						  {
+							question: "Gdy pracujesz w grupie, co wnosisz do zespołu?",
+							answers: { A: "Skupienie na kliencie.", B: "Empatię i zaufanie.", C: "Gotowość do wzięcia odpowiedzialności.", D: "Orientację na wynik.", E: "Nieszablonowe myślenie.", F: "Fakty i analizy.", G: "Wsparcie w rozwoju innych.", H: "Otwartą komunikację.", I: "Łączenie różnych stylów.", J: "Energię i tempo." }
+						  },
+						  {
+							question: "Na co zwracasz uwagę w pierwszej kolejności, podejmując nowe zadanie?",
+							answers: { A: "Jak wpłynie na klienta.", B: "Kto będzie zaangażowany.", C: "Co trzeba dowieźć.", D: "Jakie są cele i mierniki.", E: "Co można uprościć.", F: "Jakie są dane i fakty.", G: "Czego się mogę nauczyć.", H: "Czy mogę wyrazić swój głos.", I: "Jak włączyć wszystkich.", J: "Ile mam czasu i jak szybko to zrobić." }
+						  },
+						  
+						],
+						results: {
+						  A: { text: "Strażnik Zadowolenia Klienta ", img : "https://i.ibb.co/ccZsHW7H/Sta-nik-zadowolenia-klienta.jpg" },
+						  B: { text: "Pani Zaufania ", img :  "https://i.ibb.co/kVYH4gdp/Pan-zaufania.jpg" },
+						  C: { text: "Kapitan Odpowiedzialność ️", img : "https://i.ibb.co/tpNnw7Lk/Kapitan-Odpowiedzialno.jpg" },
+						  D: { text: "Mistrz Wyników ️", img : "https://i.ibb.co/4RDR7Xzn/Mistrz-wynik-w.jpg" },
+						  E: { text: "Skrótowiec Innowator  ️", img : "https://i.ibb.co/8LxSKXWZ/Skr-towiec-innowator.jpg" },
+						  F: { text: "Analitix ️", img : "https://i.ibb.co/WvGSZCRc/Analitix.jpg" },
+						  G: { text: "Mentor Rozwoju  ️", img : "https://i.ibb.co/LzXRxR4G/Mentor-rozwoju.jpg" },
+						  H: { text: "Głos Decyzji  ", img : "https://i.ibb.co/zTRWGSrS/G-os-decyzji.jpg" },
+						  I: { text: "Integratorka Różnorodności   ", img : "https://i.ibb.co/kVZT3d2n/Integrator-r-norodno-ci.jpg" },
+						  J: { text: "Błyskawica Działania  ", img : "https://i.ibb.co/vx6tTBr1/B-yskawica-dzia-ania.jpg" }
+						  
+						},
+						fortunes: [
+						  "Uśmiechaj się częściej – to klucz do sukcesu!",
+						  "Dziś spotkasz coś wyjątkowego.",
+						  "Twoje marzenia są bliżej niż myślisz."
+						],
+						rebuses: ["Koń + cep = koncept", "Ryba + rak = rybak"]
+					  },
+					  en: {
+						quizTitle: "Personality Quiz",
+						fortuneTitle: "Your Fortune:",
+						rebusTitle: "Rebus",
+						rebusText: "Here will appear a rebus…",
+						back: "← Back",
+						quizButton: "Personality Quiz",
+						fortuneButton: "Fortune Cookie",
+						rebusButton: "Rebus",
+						quizQuestions: [
+						  {
+							question: "What's your favorite color?",
+							answers: { A: "Blue", B: "Red", C: "Green" }
+						  },
+						  {
+							question: "What do you prefer to do in your free time?",
+							answers: { A: "Read", B: "Play sports", C: "Play games" }
+						  },
+						  {
+							question: "Who are you in a group?",
+							answers: { A: "Leader", B: "Mediator", C: "Quiet observer" }
+						  }
+						],
+						results: {
+						  A: { text: "You're a superhero!", img: "https://img.freepik.com/darmowe-wektory/mlody-chlopiec-superbohater-w-kostiumie_1308-168746.jpg?semt=ais_hybrid&w=740&q=80" },
+						  B: { text: "You're a caretaker!", img: "https://example.com/guardian.png" },
+						  C: { text: "You're an explorer!", img: "https://example.com/explorer.png" }
+						},
+						fortunes: [
+						  "Smile more – it's the key to success!",
+						  "Today you'll encounter something special.",
+						  "Your dreams are closer than you think."
+						],
+						rebuses: ["Horse + shoe = horseshoe", "Fish + man = fisherman"]
+					  },
+					  de: {
+						quizTitle: "Persönlichkeitsquiz",
+						fortuneTitle: "Dein Glücksspruch:",
+						rebusTitle: "Rebus",
+						rebusText: "Hier erscheint ein Rebus…",
+						back: "← Zurück",
+						quizButton: "Persönlichkeitsquiz",
+						fortuneButton: "Glückskeks",
+						rebusButton: "Rebus",
+						quizQuestions: [
+						  {
+							question: "Was ist deine Lieblingsfarbe?",
+							answers: { A: "Blau", B: "Rot", C: "Grün" }
+						  },
+						  {
+							question: "Was machst du gern in deiner Freizeit?",
+							answers: { A: "Lesen", B: "Sport treiben", C: "Spiele spielen" }
+						  },
+						  {
+							question: "Welche Rolle hast du in einer Gruppe?",
+							answers: { A: "Anführer", B: "Vermittler", C: "Beobachter" }
+						  }
+						],
+						results: {
+						  A: { text: "Du bist ein Superheld!", img: "https://img.freepik.com/darmowe-wektory/mlody-chlopiec-superbohater-w-kostiumie_1308-168746.jpg?semt=ais_hybrid&w=740&q=80" },
+						  B: { text: "Du bist ein Beschützer!", img: "https://example.com/guardian.png" },
+						  C: { text: "Du bist ein Entdecker!", img: "https://example.com/explorer.png" }
+						},
+						fortunes: [
+						  "Lächle mehr – das ist der Schlüssel zum Erfolg!",
+						  "Heute wirst du etwas Besonderes erleben.",
+						  "Deine Träume sind näher als du denkst."
+						],
+						rebuses: ["Hund + Haus = Hundshaus", "Auto + Bahn = Autobahn"]
+					  }
+					};
+
+					let currentLang = "pl";
+					let currentQuizIndex = 0;
+					let answers = [];
+
+					function setLanguage(lang) {
+					  currentLang = lang;
+					  const t = translations[lang];
+					  document.querySelector('#quiz h2').textContent = t.quizTitle;
+					  document.querySelector('#fortune h2').textContent = t.fortuneTitle;
+					  document.querySelector('#rebus h2').textContent = t.rebusTitle;
+					  document.getElementById('rebusText').textContent = t.rebusText;
+					  document.getElementById('backBtn').textContent = t.back;
+					  document.querySelector('.quiz-box').textContent = t.quizButton;
+					  document.querySelector('.fortune-box').textContent = t.fortuneButton;
+					  document.querySelector('.rebus-box').textContent = t.rebusButton;
+					}
+
+					function showSection(id) {
+					  document.getElementById('menu').style.display = 'none';
+					  document.getElementById('content').style.display = 'block';
+					  document.getElementById('backBtn').style.display = 'block';
+					  if (id === 'quiz' || id === 'fortune' || id === 'rebus') {
+					  document.getElementById('backBtn').style.display = 'block';
+					  } else {
+					  document.getElementById('backBtn').style.display = 'none';
+					  }
+					  document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+					  document.getElementById(id).style.display = 'block';
+					  if (id === 'quiz') startQuiz();
+					  if (id === 'fortune') showFortune();
+					  if (id === 'rebus') showRebus();
+					}
+
+					function goHome() {
+					  document.getElementById('menu').style.display = 'flex';
+					  document.getElementById('content').style.display = 'none';
+					  document.getElementById('backBtn').style.display = 'none';
+					}
+
+					function startQuiz() {
+					  currentQuizIndex = 0;
+					  answers = [];
+					  document.getElementById('quizResult').style.display = 'none';
+					  showQuizQuestion();
+					}
+
+					function showQuizQuestion() {
+					  const q = translations[currentLang].quizQuestions[currentQuizIndex];
+					  const container = document.getElementById('quizQuestion');
+					  container.innerHTML = `<h3>${q.question}</h3>` +
+						Object.entries(q.answers).map(([key, val]) => `<label><input type="radio" name="answer" value="${key}"> ${val}</label>`).join('') +
+						'<button onclick="submitAnswer()">Dalej</button>';
+					}
+
+					function submitAnswer() {
+					  const selected = document.querySelector('input[name="answer"]:checked');
+					  if (!selected) return;
+					  answers.push(selected.value);
+					  currentQuizIndex++;
+					  if (currentQuizIndex < translations[currentLang].quizQuestions.length) {
+						showQuizQuestion();
+					  } else {
+						showQuizResult();
+					  }
+					}
+
+					function showQuizResult() {
+					  const resultCounts = answers.reduce((acc, val) => {
+						acc[val] = (acc[val] || 0) + 1;
+						return acc;
+					  }, {});
+					  const mostCommon = Object.entries(resultCounts).sort((a,b) => b[1] - a[1])[0][0];
+					  const resultObj = translations[currentLang].results[mostCommon];
+					  document.getElementById('quizQuestion').innerHTML = '';
+					  const resultDiv = document.getElementById('quizResult');
+					  resultDiv.innerHTML = `<p>${resultObj.text}</p><img src="${resultObj.img}" alt="result">`;
+					  resultDiv.style.display = 'block';
+					}
+
+					function showFortune() {
+					  const fortunes = translations[currentLang].fortunes;
+					  document.getElementById('fortuneText').textContent = fortunes[Math.floor(Math.random() * fortunes.length)];
+					}
+
+					function showRebus() {
+					  const rebuses = translations[currentLang].rebuses;
+					  document.getElementById('rebusText').textContent = rebuses[Math.floor(Math.random() * rebuses.length)];
+					}
+
+					window.onload = () => {
+					  setLanguage(currentLang);
+					}
+			  </script>
+		</body>
+</html>
